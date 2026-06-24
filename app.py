@@ -174,14 +174,19 @@ if st.sidebar.button("🌌 Visualize Knowledge Graph", use_container_width=True)
     render_knowledge_graph()
 
 
-def render_live_connections_graph(query_text, retrieved_docs):
+def render_live_connections_graph(query_text, retrieved_docs, container=st):
     with st.spinner("Computing 2D AI Inference Connections..."):
         try:
             points, payloads = workflow.researcher.retriever.vector_store.get_all_vectors()
             if not points:
                 return
             
-            query_vector = workflow.researcher.retriever.vector_store.embeddings.embed_query(query_text)
+            if query_text:
+                query_vector = workflow.researcher.retriever.vector_store.embeddings.embed_query(query_text)
+                all_vectors = points + [query_vector]
+            else:
+                query_vector = None
+                all_vectors = points
             
             from sklearn.decomposition import PCA
             import plotly.graph_objects as go
@@ -192,8 +197,12 @@ def render_live_connections_graph(query_text, retrieved_docs):
             pca = PCA(n_components=2)
             components = pca.fit_transform(all_vectors)
             
-            bg_components = components[:-1]
-            query_comp = components[-1]
+            if query_vector:
+                bg_components = components[:-1]
+                query_comp = components[-1]
+            else:
+                bg_components = components
+                query_comp = None
             
             fig = go.Figure()
             
@@ -235,16 +244,17 @@ def render_live_connections_graph(query_text, retrieved_docs):
                     ))
             
             # Query point
-            fig.add_trace(go.Scatter(
-                x=[query_comp[0]],
-                y=[query_comp[1]],
-                mode='markers',
-                marker=dict(size=16, color='red', symbol='star'),
-                name='Your Query'
-            ))
+            if query_comp is not None:
+                fig.add_trace(go.Scatter(
+                    x=[query_comp[0]],
+                    y=[query_comp[1]],
+                    mode='markers',
+                    marker=dict(size=16, color='red', symbol='star'),
+                    name='Your Query'
+                ))
             
             fig.update_layout(title="🧠 Live AI Inference Connections (2D PCA)", margin=dict(l=0, r=0, t=30, b=0))
-            st.plotly_chart(fig, use_container_width=True)
+            container.plotly_chart(fig, use_container_width=True)
             
         except Exception as e:
             st.error(f"Failed to generate connection graph: {e}")
@@ -309,6 +319,14 @@ if query or st.session_state.resume_graph:
                 final_docs = []
             
             final_draft = ""
+            
+            with st.expander("🧠 Live AI Inference Connections", expanded=True):
+                graph_container = st.empty()
+                if not st.session_state.resume_graph:
+                    render_live_connections_graph(None, [], container=graph_container)
+                else:
+                    state_info = workflow.app.get_state(config)
+                    render_live_connections_graph(st.session_state.chat_history[-1].content, state_info.values.get("documents", []), container=graph_container)
             for s in workflow.stream(
                 stream_input, 
                 chat_history=st.session_state.chat_history[:-1],
@@ -330,6 +348,7 @@ if query or st.session_state.resume_graph:
                     elif node == "research":
                         with visualizer_container:
                             components.html(get_agent_graph_html("grade"), height=420)
+                        render_live_connections_graph(query_to_run, state.get("documents", []), container=graph_container)
                     elif node == "grade":
                         with visualizer_container:
                             components.html(get_agent_graph_html("synthesize"), height=420)
@@ -395,9 +414,7 @@ if query or st.session_state.resume_graph:
                     mime="text/markdown"
                 )
                 
-                if final_docs:
-                    with st.expander("🧠 View Live AI Inference Connections", expanded=False):
-                        render_live_connections_graph(query_to_run, final_docs)
+
 
                 st.session_state.chat_history.append(AIMessage(content=display_draft))
             

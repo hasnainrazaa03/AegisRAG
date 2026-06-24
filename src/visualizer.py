@@ -13,6 +13,7 @@ def get_agent_graph_html(active_node: str) -> str:
     
     # State flags
     r_status = "pending"
+    g_status = "pending"
     s_status = "pending"
     c_status = "pending"
     
@@ -20,39 +21,57 @@ def get_agent_graph_html(active_node: str) -> str:
     line1_color = color_pending
     line2_class = ""
     line2_color = color_pending
+    line3_class = ""
+    line3_color = color_pending
     
     if active_node == "research":
         r_status = "active"
-    elif active_node == "synthesize":
+    elif active_node == "grade":
         r_status = "completed"
-        s_status = "active"
+        g_status = "active"
         line1_class = "marching"
         line1_color = color_active
-    elif active_node == "critique":
+    elif active_node == "synthesize":
         r_status = "completed"
-        s_status = "completed"
-        c_status = "active"
+        g_status = "completed"
+        s_status = "active"
         line1_class = "solid"
         line1_color = color_completed
         line2_class = "marching"
         line2_color = color_active
+    elif active_node == "critique":
+        r_status = "completed"
+        g_status = "completed"
+        s_status = "completed"
+        c_status = "active"
+        line1_class = "solid"
+        line1_color = color_completed
+        line2_class = "solid"
+        line2_color = color_completed
+        line3_class = "marching"
+        line3_color = color_active
     elif active_node == "rewrite":
         r_status = "completed"
+        g_status = "completed"
         s_status = "active" # Back to synthesis
         c_status = "pending"
         line1_class = "solid"
         line1_color = color_completed
-        # Rewriting shows a reverse animation or yellow warning
-        line2_class = "marching-reverse"
-        line2_color = "rgb(234, 179, 8)"
+        line2_class = "solid"
+        line2_color = color_completed
+        line3_class = "marching-reverse"
+        line3_color = "rgb(234, 179, 8)"
     elif active_node == "complete":
         r_status = "completed"
+        g_status = "completed"
         s_status = "completed"
         c_status = "completed"
         line1_class = "solid"
         line1_color = color_completed
         line2_class = "solid"
         line2_color = color_completed
+        line3_class = "solid"
+        line3_color = color_completed
 
     def make_node(label, status):
         c = 251.32
@@ -112,7 +131,7 @@ def get_agent_graph_html(active_node: str) -> str:
         }}
         .graph-container {{
             position: relative;
-            width: 600px;
+            width: 800px;
             height: 100px;
         }}
         .connectors {{
@@ -175,11 +194,13 @@ def get_agent_graph_html(active_node: str) -> str:
     
     <div class="graph-wrapper">
         <div class="graph-container">
-            <svg class="connectors" width="600" height="100">
-                <!-- Research to Synthesize -->
+            <svg class="connectors" width="800" height="100">
+                <!-- Research to Grade -->
                 <line x1="100" y1="50" x2="300" y2="50" stroke="{line1_color}" class="line-path {line1_class}" />
-                <!-- Synthesize to Critique -->
+                <!-- Grade to Synthesize -->
                 <line x1="300" y1="50" x2="500" y2="50" stroke="{line2_color}" class="line-path {line2_class}" />
+                <!-- Synthesize to Critique -->
+                <line x1="500" y1="50" x2="700" y2="50" stroke="{line3_color}" class="line-path {line3_class}" />
             </svg>
             
             <div style="position: absolute; left: 50px; top: 0px; z-index: 1;">
@@ -187,10 +208,14 @@ def get_agent_graph_html(active_node: str) -> str:
             </div>
             
             <div style="position: absolute; left: 250px; top: 0px; z-index: 1;">
-                {make_node("SYNTHESIZE", s_status)}
+                {make_node("GRADE", g_status)}
             </div>
             
             <div style="position: absolute; left: 450px; top: 0px; z-index: 1;">
+                {make_node("SYNTHESIZE", s_status)}
+            </div>
+            
+            <div style="position: absolute; left: 650px; top: 0px; z-index: 1;">
                 {make_node("CRITIQUE", c_status)}
             </div>
         </div>

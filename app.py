@@ -170,7 +170,9 @@ if query:
                             with visualizer_container:
                                 components.html(get_agent_graph_html("research"), height=420)
                     elif node == "research":
-                        # Transition to Synthesizer
+                        with visualizer_container:
+                            components.html(get_agent_graph_html("grade"), height=420)
+                    elif node == "grade":
                         with visualizer_container:
                             components.html(get_agent_graph_html("synthesize"), height=420)
                     elif node == "synthesize":

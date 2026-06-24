@@ -4,12 +4,14 @@ from src.agents.researcher import ResearcherAgent
 from src.agents.synthesizer import SynthesizerAgent
 from src.agents.supervisor import SupervisorAgent
 from src.agents.critic import CriticAgent
+from src.agents.grader import GraderAgent
 
 class AegisRAGWorkflow:
     def __init__(self, llm=None, use_hyde: bool = True, max_iterations: int = 3, vector_store=None):
         self.max_iterations = max_iterations
         self.supervisor = SupervisorAgent(llm=llm)
         self.researcher = ResearcherAgent(llm=llm, use_hyde=use_hyde, vector_store=vector_store)
+        self.grader = GraderAgent(llm=llm)
         self.synthesizer = SynthesizerAgent(llm=llm)
         self.critic = CriticAgent(llm=llm)
         
@@ -20,6 +22,7 @@ class AegisRAGWorkflow:
         # Add nodes
         self.workflow.add_node("supervisor", self.supervisor.invoke)
         self.workflow.add_node("research", self.researcher.invoke)
+        self.workflow.add_node("grade", self.grader.invoke)
         self.workflow.add_node("synthesize", self.synthesizer.invoke)
         self.workflow.add_node("critique", self.critic.invoke)
         
@@ -35,7 +38,8 @@ class AegisRAGWorkflow:
             }
         )
         
-        self.workflow.add_edge("research", "synthesize")
+        self.workflow.add_edge("research", "grade")
+        self.workflow.add_edge("grade", "synthesize")
         self.workflow.add_edge("synthesize", "critique")
         
         # Conditional edge: If hallucination and iterations < 3, rewrite. Otherwise, end.

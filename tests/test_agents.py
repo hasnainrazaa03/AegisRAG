@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from src.agents.synthesizer import SynthesizerAgent
 from src.agents.critic import CriticAgent
+from src.agents.grader import GraderAgent
 from langchain_core.documents import Document
 
 def test_synthesizer_empty_context():
@@ -58,3 +59,37 @@ def test_critic_malformed_json_fallback():
     # The new robust behavior should assume hallucination and force rewrite
     assert result["is_hallucination"] is True
     assert "failed to parse" in result["critique"].lower()
+
+def test_grader_filters_irrelevant_docs():
+    agent = GraderAgent()
+    agent.chain = MagicMock()
+    # Mock chain returns 'yes' for first doc, 'no' for second
+    agent.chain.invoke.side_effect = [{"score": "yes"}, {"score": "no"}]
+    
+    state = {
+        "question": "What is the capital of France?",
+        "documents": [
+            Document(page_content="Paris is the capital of France."),
+            Document(page_content="Bananas are a great source of potassium.")
+        ]
+    }
+    
+    result = agent.invoke(state)
+    docs = result["documents"]
+    assert len(docs) == 1
+    assert "Paris" in docs[0].page_content
+
+def test_grader_malformed_json_fallback():
+    agent = GraderAgent()
+    agent.chain = MagicMock()
+    agent.chain.invoke.side_effect = Exception("JSONDecodeError")
+    
+    state = {
+        "question": "Testing fallback",
+        "documents": [Document(page_content="Keep me just in case.")]
+    }
+    
+    result = agent.invoke(state)
+    docs = result["documents"]
+    # Should keep the document if grading fails
+    assert len(docs) == 1

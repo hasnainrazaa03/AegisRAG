@@ -30,7 +30,8 @@ st.sidebar.header("Agent Configuration")
 
 model_choice = st.sidebar.selectbox(
     "Choose LLM Engine:",
-    ("Local (Ollama Llama 3)", "Cloud (Claude 3.5 Sonnet)", "Cloud (Gemini 2.5 Flash)")
+    ("Local (Ollama Llama 3)", "Cloud (Claude 3.5 Sonnet)", "Cloud (Gemini 2.5 Flash)"),
+    index=2
 )
 
 max_iterations = st.sidebar.slider("Max Critic Iterations", min_value=1, max_value=5, value=3)

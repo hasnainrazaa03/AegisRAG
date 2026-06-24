@@ -11,6 +11,7 @@ from src.config import config
 from src.agents.graph import AegisRAGWorkflow
 from langchain_ollama import ChatOllama
 from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -29,7 +30,7 @@ st.sidebar.header("Agent Configuration")
 
 model_choice = st.sidebar.selectbox(
     "Choose LLM Engine:",
-    ("Local (Ollama Llama 3)", "Cloud (Claude 3.5 Sonnet)")
+    ("Local (Ollama Llama 3)", "Cloud (Claude 3.5 Sonnet)", "Cloud (Gemini 2.5 Flash)")
 )
 
 max_iterations = st.sidebar.slider("Max Critic Iterations", min_value=1, max_value=5, value=3)
@@ -42,6 +43,11 @@ def get_llm():
             st.sidebar.error("⚠️ ANTHROPIC_API_KEY not found in .env")
             return None
         return ChatAnthropic(model_name="claude-3-5-sonnet-20240620", anthropic_api_key=config.ANTHROPIC_API_KEY)
+    elif model_choice == "Cloud (Gemini 2.5 Flash)":
+        if not config.GOOGLE_API_KEY:
+            st.sidebar.error("⚠️ GOOGLE_API_KEY not found in .env")
+            return None
+        return ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=config.GOOGLE_API_KEY)
     else:
         return ChatOllama(model="llama3")
 

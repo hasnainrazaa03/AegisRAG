@@ -1,4 +1,4 @@
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
 from src.agents.state import AegisRAGState
@@ -8,6 +8,7 @@ class SynthesizerAgent:
         self.llm = llm or ChatOllama(model="llama3")
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", "You are an expert engineering assistant. Use the provided retrieved context to answer the user's question. If you don't know the answer or the context doesn't contain it, say so. Do not hallucinate."),
+            MessagesPlaceholder(variable_name="chat_history"),
             ("user", "Context: {context}\n\nQuestion: {question}")
         ])
         self.chain = self.prompt | self.llm | StrOutputParser()
@@ -23,6 +24,7 @@ class SynthesizerAgent:
         context_str = "\n\n".join([doc.page_content for doc in state["documents"]])
         
         draft = self.chain.invoke({
+            "chat_history": state.get("chat_history", []),
             "context": context_str,
             "question": state["question"]
         })

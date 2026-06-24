@@ -1,4 +1,4 @@
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
@@ -18,7 +18,8 @@ class CriticAgent:
         self.parser = JsonOutputParser(pydantic_object=CritiqueOutput)
         
         self.prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are a strict grading assistant. Evaluate if the Draft Answer is fully supported by the Context. If the draft contains ANY information not in the Context, mark it as a hallucination. Respond ONLY with valid JSON matching the schema.\n{format_instructions}"),
+            ("system", "You are a strict grading assistant. Evaluate if the Draft Answer is fully supported by the Context. If the draft contains ANY information not in the Context or the Chat History, mark it as a hallucination. Respond ONLY with valid JSON matching the schema.\n{format_instructions}"),
+            MessagesPlaceholder(variable_name="chat_history"),
             ("user", "Context: {context}\n\nDraft Answer: {draft_answer}")
         ])
         
@@ -33,6 +34,7 @@ class CriticAgent:
         
         try:
             result = self.chain.invoke({
+                "chat_history": state.get("chat_history", []),
                 "context": context_str,
                 "draft_answer": state["draft_answer"],
                 "format_instructions": self.parser.get_format_instructions()

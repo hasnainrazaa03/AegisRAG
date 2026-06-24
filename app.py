@@ -116,6 +116,15 @@ st.sidebar.write("**Vector Store:** `Qdrant (Local)`")
 st.sidebar.write("**Re-ranker:** `FlashRank (TinyBERT)`")
 
 # ---- MAIN INTERFACE ----
+from langchain_core.messages import HumanMessage, AIMessage
+
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+for msg in st.session_state.chat_history:
+    role = "user" if isinstance(msg, HumanMessage) else "assistant"
+    with st.chat_message(role):
+        st.write(msg.content)
 
 query = st.chat_input("Enter your engineering query (e.g., structural tolerance limits)")
 
@@ -124,9 +133,11 @@ if query:
         st.error("Please configure your API keys to use the selected model.")
         st.stop()
         
-    # Display User Query
+    # Display User Query and append to state
     with st.chat_message("user"):
         st.write(query)
+    
+    st.session_state.chat_history.append(HumanMessage(content=query))
         
     # Stream execution using the Custom HTML/SVG Visualizer
     with st.chat_message("assistant"):
@@ -138,7 +149,7 @@ if query:
                 components.html(get_agent_graph_html("research"), height=420)
             
             final_draft = ""
-            for s in workflow.stream(query):
+            for s in workflow.stream(query, chat_history=st.session_state.chat_history[:-1]):
                 # 's' is a dictionary keyed by the node name
                 for node, state in s.items():
                     if node == "research":
@@ -165,6 +176,7 @@ if query:
             
             st.subheader("Final Synthesized Answer:")
             st.write(final_draft)
+            st.session_state.chat_history.append(AIMessage(content=final_draft))
             
         except Exception as e:
             st.error(f"An error occurred during execution: {e}")

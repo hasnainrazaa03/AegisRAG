@@ -44,10 +44,13 @@ class AegisRAGWorkflow:
         print("--- DECISION: Answer approved or max iterations reached. ---")
         return "end"
         
-    def run(self, question: str):
+    def run(self, question: str, chat_history: list = None):
+        if chat_history is None:
+            chat_history = []
         print(f"\n[Starting AegisRAG Workflow] Question: {question}")
         initial_state = {
             "question": question,
+            "chat_history": chat_history,
             "documents": [],
             "draft_answer": "",
             "critique": "",
@@ -59,10 +62,13 @@ class AegisRAGWorkflow:
         final_result = self.app.invoke(initial_state)
         return final_result.get("draft_answer", "No answer generated.")
 
-    def stream(self, question: str):
+    def stream(self, question: str, chat_history: list = None):
+        if chat_history is None:
+            chat_history = []
         print(f"\n[Starting AegisRAG Workflow Stream] Question: {question}")
         initial_state = {
             "question": question,
+            "chat_history": chat_history,
             "documents": [],
             "draft_answer": "",
             "critique": "",

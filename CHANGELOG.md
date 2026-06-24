@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-06-24
 
 ### Added
+- **Conversational Memory**: Updated `AegisRAGState`, `AegisRAGWorkflow`, `SynthesizerAgent`, and Streamlit UI to maintain and utilize multi-turn chat history.
 - **Multi-Agent RAG Pipeline**: Implemented `ResearcherAgent`, `SynthesizerAgent`, and `CriticAgent` using LangGraph.
 - **Glassmorphic Interactive Visualizer**: SVG and CSS based animated progress UI injected natively into Streamlit to visualize agent states in real-time.
 - **Dynamic PDF Uploading**: Users can upload `.pdf` engineering documents via the sidebar which are chunked and indexed into the database on the fly.

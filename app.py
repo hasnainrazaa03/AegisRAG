@@ -177,6 +177,7 @@ if st.sidebar.button("🌌 Visualize Knowledge Graph", use_container_width=True)
 def render_live_connections_graph(query_text, retrieved_docs, container=st):
     with st.spinner("Computing 2D AI Inference Connections..."):
         try:
+            import numpy as np
             points, payloads = workflow.researcher.retriever.vector_store.get_all_vectors()
             
             # Enforce strict homogeneity to prevent numpy inhomogeneous shape errors
@@ -184,8 +185,11 @@ def render_live_connections_graph(query_text, retrieved_docs, container=st):
             valid_payloads = []
             for p, pay in zip(points, payloads):
                 if hasattr(p, '__len__') and len(p) == 384:
-                    valid_points.append(p)
-                    valid_payloads.append(pay)
+                    # Explicitly convert to 1D float array to guarantee homogeneity
+                    arr = np.array(p, dtype=float).flatten()
+                    if arr.shape == (384,):
+                        valid_points.append(arr)
+                        valid_payloads.append(pay)
             
             points = valid_points
             payloads = valid_payloads
@@ -195,7 +199,12 @@ def render_live_connections_graph(query_text, retrieved_docs, container=st):
             
             if query_text:
                 query_vector = workflow.researcher.retriever.vector_store.embeddings.embed_query(query_text)
-                all_vectors = points + [query_vector]
+                query_arr = np.array(query_vector, dtype=float).flatten()
+                if query_arr.shape == (384,):
+                    all_vectors = points + [query_arr]
+                else:
+                    query_text = None # fallback if embed_query shape is weird
+                    all_vectors = points
             else:
                 query_vector = None
                 all_vectors = points
@@ -203,9 +212,10 @@ def render_live_connections_graph(query_text, retrieved_docs, container=st):
             from sklearn.decomposition import PCA
             import plotly.graph_objects as go
             import pandas as pd
-            import numpy as np
             
-            all_vectors = points + [query_vector]
+            # Final safety check before PCA
+            all_vectors = np.vstack(all_vectors)
+            
             pca = PCA(n_components=2)
             components = pca.fit_transform(all_vectors)
             
@@ -266,7 +276,10 @@ def render_live_connections_graph(query_text, retrieved_docs, container=st):
                 ))
             
             fig.update_layout(title="🧠 Live AI Inference Connections (2D PCA)", margin=dict(l=0, r=0, t=30, b=0))
-            container.plotly_chart(fig, use_container_width=True)
+            
+            # Generate a unique key using the number of retrieved docs so Streamlit knows it's a new frame in the animation
+            unique_key = f"live_graph_{len(retrieved_docs) if retrieved_docs else 0}"
+            container.plotly_chart(fig, use_container_width=True, key=unique_key)
             
         except Exception as e:
             st.error(f"Failed to generate connection graph: {e}")

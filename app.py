@@ -120,41 +120,64 @@ from langchain_core.messages import HumanMessage, AIMessage
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+if "thread_id" not in st.session_state:
+    import uuid
+    st.session_state.thread_id = str(uuid.uuid4())
+if "awaiting_approval" not in st.session_state:
+    st.session_state.awaiting_approval = False
+if "resume_graph" not in st.session_state:
+    st.session_state.resume_graph = False
+if "pending_docs" not in st.session_state:
+    st.session_state.pending_docs = []
 
 for msg in st.session_state.chat_history:
     role = "user" if isinstance(msg, HumanMessage) else "assistant"
     with st.chat_message(role):
         st.write(msg.content)
 
-query = st.chat_input("Enter your engineering query (e.g., structural tolerance limits)")
+disable_chat = st.session_state.awaiting_approval or st.session_state.resume_graph
+query = st.chat_input("Enter your engineering query (e.g., structural tolerance limits)", disabled=disable_chat)
 
-if query:
+if query or st.session_state.resume_graph:
     if workflow is None:
         st.error("Please configure your API keys to use the selected model.")
         st.stop()
         
-    # Display User Query and append to state
-    with st.chat_message("user"):
-        st.write(query)
+    if query and not st.session_state.resume_graph:
+        st.session_state.chat_history.append(HumanMessage(content=query))
+        st.session_state.current_query = query
+        
+    query_to_run = st.session_state.get("current_query", "")
     
-    st.session_state.chat_history.append(HumanMessage(content=query))
+    # Display User Query
+    with st.chat_message("user"):
+        st.write(query_to_run)
         
     # Stream execution using the Custom HTML/SVG Visualizer
     with st.chat_message("assistant"):
         visualizer_container = st.empty()
         answer_container = st.empty()
         
+        config = {"configurable": {"thread_id": st.session_state.thread_id, "stream_container": answer_container}}
+        
         try:
-            # Initial render: Researcher active
-            with visualizer_container:
-                components.html(get_agent_graph_html("research"), height=420)
+            if st.session_state.resume_graph:
+                with visualizer_container:
+                    components.html(get_agent_graph_html("synthesize"), height=420)
+                state_info = workflow.app.get_state(config)
+                final_docs = state_info.values.get("documents", [])
+                stream_input = None
+            else:
+                with visualizer_container:
+                    components.html(get_agent_graph_html("research"), height=420)
+                stream_input = query_to_run
+                final_docs = []
             
             final_draft = ""
-            final_docs = []
             for s in workflow.stream(
-                query, 
+                stream_input, 
                 chat_history=st.session_state.chat_history[:-1],
-                config={"configurable": {"stream_container": answer_container}}
+                config=config
             ):
                 # 's' is a dictionary keyed by the node name
                 for node, state in s.items():
@@ -193,41 +216,74 @@ if query:
                                 components.html(get_agent_graph_html("complete"), height=420)
                             st.toast("✅ Critic approved the response!")
             
-            answer_container.empty()
-            display_draft = final_draft
-            if final_docs:
-                references_md = "\n\n**References & Sources:**\n"
-                for i, doc in enumerate(final_docs):
-                    source_name = doc.metadata.get('source', 'Unknown Document')
-                    page = doc.metadata.get('page', 'N/A')
-                    references_md += f"- **[{i+1}]** {source_name} (Page {page})\n"
+            # Check if interrupted
+            state_info = workflow.app.get_state(config)
+            if state_info.next and "synthesize" in state_info.next:
+                st.session_state.awaiting_approval = True
+                st.session_state.pending_docs = final_docs
+                st.rerun()
+            else:
+                st.session_state.awaiting_approval = False
+                st.session_state.resume_graph = False
                 
-                display_draft += references_md
-
-            st.subheader("Final Synthesized Answer:")
-            st.write(final_draft)
-            
-            if final_docs:
-                with st.expander("View References & Sources"):
+                answer_container.empty()
+                display_draft = final_draft
+                if final_docs:
+                    references_md = "\n\n**References & Sources:**\n"
                     for i, doc in enumerate(final_docs):
-                        st.markdown(f"**[{i+1}] {doc.metadata.get('source', 'Unknown')} (Page {doc.metadata.get('page', 'N/A')})**")
-                        st.text(doc.page_content[:300] + "...")
-                        
-            # Create and display download button for the report
-            report_content = f"# AegisRAG Research Report\n\n"
-            report_content += f"**Question:** {query}\n\n"
-            report_content += f"**Answer:**\n{final_draft}\n\n"
-            if final_docs:
-                report_content += references_md
-                
-            st.download_button(
-                label="📥 Download Report (.md)",
-                data=report_content,
-                file_name="aegisrag_report.md",
-                mime="text/markdown"
-            )
+                        source_name = doc.metadata.get('source', 'Unknown Document')
+                        page = doc.metadata.get('page', 'N/A')
+                        references_md += f"- **[{i+1}]** {source_name} (Page {page})\n"
+                    
+                    display_draft += references_md
 
-            st.session_state.chat_history.append(AIMessage(content=display_draft))
+                st.subheader("Final Synthesized Answer:")
+                st.write(final_draft)
+                
+                if final_docs:
+                    with st.expander("View References & Sources"):
+                        for i, doc in enumerate(final_docs):
+                            st.markdown(f"**[{i+1}] {doc.metadata.get('source', 'Unknown')} (Page {doc.metadata.get('page', 'N/A')})**")
+                            st.text(doc.page_content[:300] + "...")
+                            
+                # Create and display download button for the report
+                report_content = f"# AegisRAG Research Report\n\n"
+                report_content += f"**Question:** {query_to_run}\n\n"
+                report_content += f"**Answer:**\n{final_draft}\n\n"
+                if final_docs:
+                    report_content += references_md
+                    
+                st.download_button(
+                    label="📥 Download Report (.md)",
+                    data=report_content,
+                    file_name="aegisrag_report.md",
+                    mime="text/markdown"
+                )
+
+                st.session_state.chat_history.append(AIMessage(content=display_draft))
             
         except Exception as e:
             st.error(f"An error occurred during execution: {e}")
+
+
+if st.session_state.awaiting_approval:
+    with st.chat_message("assistant"):
+        st.info("⏸️ Execution paused by Human-in-the-Loop.")
+        with st.expander("Review Retrieved Context before Synthesis", expanded=True):
+            if st.session_state.pending_docs:
+                for i, doc in enumerate(st.session_state.pending_docs):
+                    st.markdown(f"**[{i+1}] {doc.metadata.get('source', 'Unknown')} (Page {doc.metadata.get('page', 'N/A')})**")
+                    st.write(doc.page_content)
+            else:
+                st.write("No relevant documents found. The Synthesizer will likely fail to answer.")
+        
+        col1, col2 = st.columns(2)
+        if col1.button("✅ Approve & Continue"):
+            st.session_state.awaiting_approval = False
+            st.session_state.resume_graph = True
+            st.rerun()
+        if col2.button("❌ Reject & Cancel"):
+            st.session_state.awaiting_approval = False
+            st.session_state.resume_graph = False
+            st.session_state.chat_history.append(AIMessage(content="Search cancelled by user during HIL review."))
+            st.rerun()

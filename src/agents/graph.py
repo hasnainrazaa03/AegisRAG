@@ -1,4 +1,5 @@
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
 from src.agents.state import AegisRAGState
 from src.agents.researcher import ResearcherAgent
 from src.agents.synthesizer import SynthesizerAgent
@@ -52,7 +53,11 @@ class AegisRAGWorkflow:
             }
         )
         
-        self.app = self.workflow.compile()
+        self.memory = MemorySaver()
+        self.app = self.workflow.compile(
+            checkpointer=self.memory,
+            interrupt_before=["synthesize"]
+        )
 
     def _route_from_supervisor(self, state: AegisRAGState):
         if state.get("needs_rag", True):
@@ -86,6 +91,10 @@ class AegisRAGWorkflow:
         return final_result.get("draft_answer", "No answer generated.")
 
     def stream(self, question: str, chat_history: list = None, config: dict = None):
+        if question is None:
+            # Resuming interrupted execution
+            return self.app.stream(None, config=config)
+            
         if chat_history is None:
             chat_history = []
         print(f"\n[Starting AegisRAG Workflow Stream] Question: {question}")

@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Streaming Answers**: `SynthesizerAgent` now streams output token-by-token to the Streamlit UI.
 - **Active Document Grading (Self-RAG)**: `GraderAgent` evaluates relevance of retrieved context chunks and explicitly filters out bad documents to prevent hallucination context bloat.
 - **Export to Report**: Users can now download a clean Markdown `.md` report containing their question, the synthesized answer, and references directly from the chat UI.
+- **Human-in-the-Loop (HIL)**: Graph execution now natively pauses (`interrupt_before`) prior to the synthesis stage, allowing users to manually approve or reject the graded context via the UI.
 
 ## [1.0.0] - 2026-06-24
 

@@ -90,6 +90,10 @@ if uploaded_file and st.sidebar.button("Ingest Document"):
                 
                 docs = loader.load()
                 
+                # Replace the temporary path with the actual filename for display
+                for doc in docs:
+                    doc.metadata["source"] = uploaded_file.name
+                
                 # Also save permanently to data directory for future batch runs
                 perm_path = os.path.join(config.DATA_DIR, uploaded_file.name)
                 with open(perm_path, "wb") as f:

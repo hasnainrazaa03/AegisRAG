@@ -1,5 +1,6 @@
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from src.agents.state import AegisRAGState
 from src.agents.researcher import ResearcherAgent
 from src.agents.synthesizer import SynthesizerAgent
@@ -53,7 +54,7 @@ class AegisRAGWorkflow:
             }
         )
         
-        self.memory = MemorySaver()
+        self.memory = MemorySaver(serde=JsonPlusSerializer())
         self.app = self.workflow.compile(
             checkpointer=self.memory,
             interrupt_before=["synthesize"]

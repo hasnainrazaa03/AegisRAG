@@ -7,7 +7,7 @@ This document tracks upcoming features, structural architectural changes, and kn
 - [ ] **Inline Source Citations & References**: Synthesizer Agent explicitly cites the documents/web pages it used, displaying clickable footnotes in the UI.
 - [x] **Streaming Answers**: Stream text token-by-token into the Streamlit UI to make it feel blazing fast.
 - [x] **Active Document Grading (Self-RAG)**: A new `GraderAgent` to discard irrelevant retrieved documents before the Synthesizer sees them.
-- [ ] **Export to PDF/Report**: Add a button to export the finalized answer and references as a formatted PDF or Markdown report.
+- [x] **Export to PDF/Report**: Add a button to export the finalized answer and references as a formatted PDF or Markdown report.
 - [ ] **Human-in-the-Loop (HIL)**: Pause execution before the Synthesizer runs to let the user review and accept/reject retrieved context.
 
 ## Completed Features

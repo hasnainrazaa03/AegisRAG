@@ -208,11 +208,24 @@ if query:
             st.write(final_draft)
             
             if final_docs:
-                with st.expander("📚 References & Sources"):
+                with st.expander("View References & Sources"):
                     for i, doc in enumerate(final_docs):
-                        source_name = doc.metadata.get('source', 'Unknown Document')
-                        page = doc.metadata.get('page', 'N/A')
-                        st.markdown(f"**[{i+1}]** {source_name} (Page {page})")
+                        st.markdown(f"**[{i+1}] {doc.metadata.get('source', 'Unknown')} (Page {doc.metadata.get('page', 'N/A')})**")
+                        st.text(doc.page_content[:300] + "...")
+                        
+            # Create and display download button for the report
+            report_content = f"# AegisRAG Research Report\n\n"
+            report_content += f"**Question:** {query}\n\n"
+            report_content += f"**Answer:**\n{final_draft}\n\n"
+            if final_docs:
+                report_content += references_md
+                
+            st.download_button(
+                label="📥 Download Report (.md)",
+                data=report_content,
+                file_name="aegisrag_report.md",
+                mime="text/markdown"
+            )
 
             st.session_state.chat_history.append(AIMessage(content=display_draft))
             

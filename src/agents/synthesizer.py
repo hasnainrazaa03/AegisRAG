@@ -7,7 +7,7 @@ class SynthesizerAgent:
     def __init__(self, llm=None):
         self.llm = llm or ChatOllama(model="llama3")
         self.prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are an expert engineering assistant. Use the provided retrieved context to answer the user's question. If you don't know the answer or the context doesn't contain it, say so. Do not hallucinate."),
+            ("system", "You are an expert engineering assistant. Use the provided retrieved context to answer the user's question. When referencing facts, you MUST include inline citations in the format [1], [2], etc., corresponding to the Source numbers provided in the context. If you don't know the answer or the context doesn't contain it, say so. Do not hallucinate."),
             MessagesPlaceholder(variable_name="chat_history"),
             ("user", "Context: {context}\n\nQuestion: {question}")
         ])
@@ -21,7 +21,7 @@ class SynthesizerAgent:
         if not state.get("documents"):
             return {"draft_answer": "I could not find any relevant information in the uploaded documents to answer your question."}
             
-        context_str = "\n\n".join([doc.page_content for doc in state["documents"]])
+        context_str = "\n\n".join([f"[Source {i+1}]\n{doc.page_content}" for i, doc in enumerate(state["documents"])])
         
         draft = self.chain.invoke({
             "chat_history": state.get("chat_history", []),

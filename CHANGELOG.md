@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Inline Source Citations & References**: `SynthesizerAgent` now properly injects references into its answers (`[1]`, `[2]`), and `app.py` renders an expandable 'References & Sources' list at the bottom of the message.
+- **Query Contextualization**: `ResearcherAgent` reformulates queries referencing chat history to stand-alone queries prior to searching vector store or web.
+- **Multi-Model Support**: Dropdown added in sidebar to hot-swap between `llama3` and `claude-3-5-sonnet`.
+
 ## [1.0.0] - 2026-06-24
 
 ### Added

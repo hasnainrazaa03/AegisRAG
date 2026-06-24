@@ -149,9 +149,12 @@ if query:
                 components.html(get_agent_graph_html("research"), height=420)
             
             final_draft = ""
+            final_docs = []
             for s in workflow.stream(query, chat_history=st.session_state.chat_history[:-1]):
                 # 's' is a dictionary keyed by the node name
                 for node, state in s.items():
+                    if "documents" in state:
+                        final_docs = state["documents"]
                     if node == "supervisor":
                         if not state.get("needs_rag", True):
                             final_draft = state.get("draft_answer", "")
@@ -183,9 +186,27 @@ if query:
                                 components.html(get_agent_graph_html("complete"), height=420)
                             st.toast("✅ Critic approved the response!")
             
+            display_draft = final_draft
+            if final_docs:
+                references_md = "\n\n**References & Sources:**\n"
+                for i, doc in enumerate(final_docs):
+                    source_name = doc.metadata.get('source', 'Unknown Document')
+                    page = doc.metadata.get('page', 'N/A')
+                    references_md += f"- **[{i+1}]** {source_name} (Page {page})\n"
+                
+                display_draft += references_md
+
             st.subheader("Final Synthesized Answer:")
             st.write(final_draft)
-            st.session_state.chat_history.append(AIMessage(content=final_draft))
+            
+            if final_docs:
+                with st.expander("📚 References & Sources"):
+                    for i, doc in enumerate(final_docs):
+                        source_name = doc.metadata.get('source', 'Unknown Document')
+                        page = doc.metadata.get('page', 'N/A')
+                        st.markdown(f"**[{i+1}]** {source_name} (Page {page})")
+
+            st.session_state.chat_history.append(AIMessage(content=display_draft))
             
         except Exception as e:
             st.error(f"An error occurred during execution: {e}")

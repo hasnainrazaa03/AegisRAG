@@ -4,6 +4,13 @@ This document tracks upcoming features, structural architectural changes, and kn
 
 ## Planned Features
 
+- [ ] **Inline Source Citations & References**: Synthesizer Agent explicitly cites the documents/web pages it used, displaying clickable footnotes in the UI.
+- [ ] **Streaming Answers**: Stream text token-by-token into the Streamlit UI to make it feel blazing fast.
+- [ ] **Active Document Grading (Self-RAG)**: A new `GraderAgent` to discard irrelevant retrieved documents before the Synthesizer sees them.
+- [ ] **Export to PDF/Report**: Add a button to export the finalized answer and references as a formatted PDF or Markdown report.
+- [ ] **Human-in-the-Loop (HIL)**: Pause execution before the Synthesizer runs to let the user review and accept/reject retrieved context.
+
+## Completed Features
 - [x] **Multi-Model Router**: Add a dropdown in the UI to dynamically switch between local `llama3` and cloud-hosted `claude-3-5-sonnet`.
 - [x] **Conversational Memory**: Update the `AegisRAGState` to store full conversation history so agents can perform multi-turn context lookups.
 - [x] **Web Search Tool**: Give the `ResearcherAgent` a Tavily/DuckDuckGo tool to fetch real-time web results if the internal database yields empty context.

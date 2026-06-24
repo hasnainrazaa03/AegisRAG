@@ -63,6 +63,13 @@ def get_vector_store():
 
 vector_store = get_vector_store()
 
+@st.cache_resource
+def init_folder_watcher(_vector_store):
+    from src.ingestion.watcher import start_watcher
+    return start_watcher(_vector_store)
+
+watcher = init_folder_watcher(vector_store)
+
 # Initialize Workflow with settings globally so we can use its VectorStore for uploads
 @st.cache_resource(hash_funcs={ChatOllama: id, ChatAnthropic: id})
 def get_workflow(_llm, _use_hyde, _max_iterations):

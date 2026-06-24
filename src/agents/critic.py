@@ -30,7 +30,7 @@ class CriticAgent:
         Critiques the draft answer against the retrieved documents.
         """
         print("--- CRITIC: Evaluating draft for hallucinations ---")
-        context_str = "\n\n".join([doc.page_content for doc in state["documents"]])
+        context_str = "\n\n".join([doc["page_content"] for doc in state["documents"]])
         
         try:
             result = self.chain.invoke({

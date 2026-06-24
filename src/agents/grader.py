@@ -25,7 +25,7 @@ class GraderAgent:
             try:
                 score = self.chain.invoke({
                     "question": question,
-                    "document": doc.page_content
+                    "document": doc["page_content"]
                 })
                 if score.get("score", "").lower() == "yes":
                     print("--- GRADER: Document relevant ---")

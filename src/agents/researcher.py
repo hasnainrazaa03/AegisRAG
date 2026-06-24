@@ -45,8 +45,11 @@ class ResearcherAgent:
             print("--- RESEARCHER: No local context found. Falling back to Web Search ---")
             try:
                 search_result = self.search_tool.invoke(q)
-                docs = [Document(page_content=search_result, metadata={"source": "DuckDuckGo Web Search"})]
+                docs = [{"page_content": search_result, "metadata": {"source": "DuckDuckGo Web Search"}}]
             except Exception as e:
                 print(f"Web search failed: {e}")
+                docs = []
+        else:
+            docs = [{"page_content": d.page_content, "metadata": d.metadata} for d in docs]
         
         return {"documents": docs}

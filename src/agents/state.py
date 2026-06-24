@@ -1,5 +1,4 @@
 from typing import TypedDict, List
-from langchain_core.documents import Document
 from langchain_core.messages import BaseMessage
 
 class AegisRAGState(TypedDict):
@@ -8,7 +7,7 @@ class AegisRAGState(TypedDict):
     """
     question: str
     chat_history: List[BaseMessage]
-    documents: List[Document]
+    documents: List[dict]
     draft_answer: str
     critique: str
     is_hallucination: bool

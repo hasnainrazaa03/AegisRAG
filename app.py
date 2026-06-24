@@ -206,7 +206,7 @@ def render_live_connections_graph(query_text, retrieved_docs):
                 name='Knowledge Base'
             ))
             
-            retrieved_contents = [d.page_content for d in retrieved_docs]
+            retrieved_contents = [d["page_content"] for d in retrieved_docs]
             retrieved_indices = []
             for i, p in enumerate(payloads):
                 if p.get('page_content') in retrieved_contents:
@@ -378,8 +378,8 @@ if query or st.session_state.resume_graph:
                 if final_docs:
                     with st.expander("View References & Sources"):
                         for i, doc in enumerate(final_docs):
-                            st.markdown(f"**[{i+1}] {doc.metadata.get('source', 'Unknown')} (Page {doc.metadata.get('page', 'N/A')})**")
-                            st.text(doc.page_content[:300] + "...")
+                            st.markdown(f"**[{i+1}] {doc.get('metadata', {}).get('source', 'Unknown')} (Page {doc.get('metadata', {}).get('page', 'N/A')})**")
+                            st.text(doc.get("page_content", "")[:300] + "...")
                             
                 # Create and display download button for the report
                 report_content = f"# AegisRAG Research Report\n\n"
@@ -411,8 +411,8 @@ if st.session_state.awaiting_approval:
         with st.expander("Review Retrieved Context before Synthesis", expanded=True):
             if st.session_state.pending_docs:
                 for i, doc in enumerate(st.session_state.pending_docs):
-                    st.markdown(f"**[{i+1}] {doc.metadata.get('source', 'Unknown')} (Page {doc.metadata.get('page', 'N/A')})**")
-                    st.write(doc.page_content)
+                    st.markdown(f"**[{i+1}] {doc.get('metadata', {}).get('source', 'Unknown')} (Page {doc.get('metadata', {}).get('page', 'N/A')})**")
+                    st.write(doc.get("page_content", ""))
             else:
                 st.write("No relevant documents found. The Synthesizer will likely fail to answer.")
         

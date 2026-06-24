@@ -22,7 +22,7 @@ class SynthesizerAgent:
         if not state.get("documents"):
             return {"draft_answer": "I could not find any relevant information in the uploaded documents to answer your question."}
             
-        context_str = "\n\n".join([f"[Source {i+1}]\n{doc.page_content}" for i, doc in enumerate(state["documents"])])
+        context_str = "\n\n".join([f"[Source {i+1}]\n{doc['page_content']}" for i, doc in enumerate(state["documents"])])
         
         container = config.get("configurable", {}).get("stream_container") if config else None
         

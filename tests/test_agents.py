@@ -22,7 +22,7 @@ def test_synthesizer_with_context():
     
     state = {
         "question": "What is the structural tolerance?",
-        "documents": [Document(page_content="5000 PSI limit.")]
+        "documents": [{"page_content": "5000 PSI limit.", "metadata": {}}]
     }
     
     result = agent.invoke(state)
@@ -35,7 +35,7 @@ def test_critic_valid_json_no_hallucination():
     
     state = {
         "draft_answer": "The tolerance is 5000 PSI.",
-        "documents": [Document(page_content="5000 PSI limit.")],
+        "documents": [{"page_content": "5000 PSI limit.", "metadata": {}}],
         "iterations": 1
     }
     
@@ -51,7 +51,7 @@ def test_critic_malformed_json_fallback():
     
     state = {
         "draft_answer": "The tolerance is 5000 PSI.",
-        "documents": [Document(page_content="5000 PSI limit.")],
+        "documents": [{"page_content": "5000 PSI limit.", "metadata": {}}],
         "iterations": 1
     }
     
@@ -69,15 +69,15 @@ def test_grader_filters_irrelevant_docs():
     state = {
         "question": "What is the capital of France?",
         "documents": [
-            Document(page_content="Paris is the capital of France."),
-            Document(page_content="Bananas are a great source of potassium.")
+            {"page_content": "Paris is the capital of France.", "metadata": {}},
+            {"page_content": "Bananas are a great source of potassium.", "metadata": {}}
         ]
     }
     
     result = agent.invoke(state)
     docs = result["documents"]
     assert len(docs) == 1
-    assert "Paris" in docs[0].page_content
+    assert "Paris" in docs[0]["page_content"]
 
 def test_grader_malformed_json_fallback():
     agent = GraderAgent()
@@ -86,7 +86,7 @@ def test_grader_malformed_json_fallback():
     
     state = {
         "question": "Testing fallback",
-        "documents": [Document(page_content="Keep me just in case.")]
+        "documents": [{"page_content": "Keep me just in case.", "metadata": {}}]
     }
     
     result = agent.invoke(state)

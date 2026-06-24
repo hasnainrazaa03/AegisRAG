@@ -208,8 +208,8 @@ def render_live_connections_graph(query_text, retrieved_docs, container=st):
             
             # Background points
             fig.add_trace(go.Scatter(
-                x=bg_components[:, 0],
-                y=bg_components[:, 1],
+                x=bg_components[:, 0].tolist(),
+                y=bg_components[:, 1].tolist(),
                 mode='markers',
                 marker=dict(size=6, color='lightgray', opacity=0.5),
                 name='Knowledge Base'
@@ -223,8 +223,8 @@ def render_live_connections_graph(query_text, retrieved_docs, container=st):
                     
             # Draw retrieved points and lines
             if retrieved_indices:
-                ret_x = [bg_components[i, 0] for i in retrieved_indices]
-                ret_y = [bg_components[i, 1] for i in retrieved_indices]
+                ret_x = [float(bg_components[i, 0]) for i in retrieved_indices]
+                ret_y = [float(bg_components[i, 1]) for i in retrieved_indices]
                 
                 fig.add_trace(go.Scatter(
                     x=ret_x,
@@ -236,8 +236,8 @@ def render_live_connections_graph(query_text, retrieved_docs, container=st):
                 
                 for rx, ry in zip(ret_x, ret_y):
                     fig.add_trace(go.Scatter(
-                        x=[query_comp[0], rx],
-                        y=[query_comp[1], ry],
+                        x=[float(query_comp[0]), rx],
+                        y=[float(query_comp[1]), ry],
                         mode='lines',
                         line=dict(color='red', width=2, dash='dash'),
                         showlegend=False
@@ -246,8 +246,8 @@ def render_live_connections_graph(query_text, retrieved_docs, container=st):
             # Query point
             if query_comp is not None:
                 fig.add_trace(go.Scatter(
-                    x=[query_comp[0]],
-                    y=[query_comp[1]],
+                    x=[float(query_comp[0])],
+                    y=[float(query_comp[1])],
                     mode='markers',
                     marker=dict(size=16, color='red', symbol='star'),
                     name='Your Query'

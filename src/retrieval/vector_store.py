@@ -74,8 +74,18 @@ class VectorStore:
                 offset=offset
             )
             for record in records:
-                points.append(record.vector)
-                payloads.append(record.payload)
+                if record.vector is not None:
+                    # In Qdrant, if named vectors are used, vector might be a dict. Handle both cases.
+                    if isinstance(record.vector, dict):
+                        vec = list(record.vector.values())[0]
+                    else:
+                        vec = record.vector
+                    
+                    # Ensure it's a list/array of floats before appending
+                    if vec:
+                        points.append(vec)
+                        payloads.append(record.payload)
+                
                 
             if next_offset is None:
                 break

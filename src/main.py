@@ -5,10 +5,10 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.config import config
-from src.agents.graph import AgenticRAGWorkflow
+from src.agents.graph import AegisRAGWorkflow
 
 def main():
-    print("Agentic RAG Pipeline Initialized")
+    print("AegisRAG Pipeline Initialized")
     print(f"Data Directory configured at: {config.DATA_DIR}")
     
     if not os.path.exists(config.DATA_DIR):
@@ -19,7 +19,7 @@ def main():
     # In a real scenario, you'd call DocumentParser and VectorStore.index_documents here.
     # For now, we will just initialize the workflow assuming documents are indexed.
     try:
-        workflow = AgenticRAGWorkflow()
+        workflow = AegisRAGWorkflow()
         question = "What are the structural tolerance limits for the primary load-bearing beams?"
         print(f"\nExample Query: {question}")
         answer = workflow.run(question)

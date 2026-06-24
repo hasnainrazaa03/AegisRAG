@@ -1,11 +1,11 @@
-from src.agents.state import AgenticRAGState
+from src.agents.state import AegisRAGState
 from src.retrieval.hybrid_search import AdvancedRetriever
 
 class ResearcherAgent:
     def __init__(self, llm=None, use_hyde: bool = True, vector_store=None):
         self.retriever = AdvancedRetriever(use_hyde=use_hyde, llm=llm, vector_store=vector_store)
 
-    def invoke(self, state: AgenticRAGState) -> dict:
+    def invoke(self, state: AegisRAGState) -> dict:
         """
         Takes the current state, retrieves relevant documents using the advanced hybrid search,
         and updates the state.

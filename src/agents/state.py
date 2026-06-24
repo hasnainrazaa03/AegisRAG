@@ -1,9 +1,9 @@
 from typing import TypedDict, List
 from langchain_core.documents import Document
 
-class AgenticRAGState(TypedDict):
+class AegisRAGState(TypedDict):
     """
-    State for the Agentic RAG workflow.
+    State for the AegisRAG workflow.
     """
     question: str
     documents: List[Document]

@@ -7,7 +7,7 @@ import tempfile
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.config import config
-from src.agents.graph import AgenticRAGWorkflow
+from src.agents.graph import AegisRAGWorkflow
 from langchain_ollama import ChatOllama
 from langchain_anthropic import ChatAnthropic
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
@@ -15,9 +15,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from src.visualizer import get_agent_graph_html
 
-st.set_page_config(page_title="Agentic RAG for Engineering", layout="wide", page_icon="⚙️")
+st.set_page_config(page_title="AegisRAG for Engineering", layout="wide", page_icon="🛡️")
 
-st.title("⚙️ Agentic RAG Pipeline")
+st.title("🛡️ AegisRAG Pipeline")
 st.markdown("""
 This application uses a multi-agent workflow to retrieve and synthesize answers from dense engineering manuals.
 Watch the agents process your query in real-time!
@@ -60,7 +60,7 @@ vector_store = get_vector_store()
 def get_workflow(_llm, _use_hyde, _max_iterations):
     if _llm is None:
         return None
-    return AgenticRAGWorkflow(llm=_llm, use_hyde=_use_hyde, max_iterations=_max_iterations, vector_store=vector_store)
+    return AegisRAGWorkflow(llm=_llm, use_hyde=_use_hyde, max_iterations=_max_iterations, vector_store=vector_store)
 
 workflow = get_workflow(llm, use_hyde, max_iterations)
 

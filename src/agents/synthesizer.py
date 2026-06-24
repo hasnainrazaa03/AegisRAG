@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
-from src.agents.state import AgenticRAGState
+from src.agents.state import AegisRAGState
 
 class SynthesizerAgent:
     def __init__(self, llm=None):
@@ -12,7 +12,7 @@ class SynthesizerAgent:
         ])
         self.chain = self.prompt | self.llm | StrOutputParser()
 
-    def invoke(self, state: AgenticRAGState) -> dict:
+    def invoke(self, state: AegisRAGState) -> dict:
         """
         Synthesizes an answer based solely on the retrieved documents.
         """

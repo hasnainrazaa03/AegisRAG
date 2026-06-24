@@ -1,6 +1,6 @@
-# Agentic RAG Document Analysis System
+# AegisRAG Document Analysis System
 
-![Agentic RAG](https://img.shields.io/badge/Architecture-LangGraph-blue)
+![AegisRAG](https://img.shields.io/badge/Architecture-LangGraph-blue)
 ![Python](https://img.shields.io/badge/Python-3.11+-yellow)
 ![Database](https://img.shields.io/badge/Vector_DB-Qdrant-red)
 
@@ -17,8 +17,8 @@ A highly robust, multi-agent Retrieval-Augmented Generation (RAG) system built w
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/AgenticProject.git
-   cd AgenticProject
+   git clone https://github.com/yourusername/AegisRAG.git
+   cd AegisRAG
    ```
 
 2. **Set up a Virtual Environment**:

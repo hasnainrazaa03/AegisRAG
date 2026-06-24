@@ -2,7 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
-from src.agents.state import AgenticRAGState
+from src.agents.state import AegisRAGState
 
 class CritiqueOutput(BaseModel):
     is_hallucination: bool = Field(description="True if the answer contains information NOT present in the context.")
@@ -24,7 +24,7 @@ class CriticAgent:
         
         self.chain = self.prompt | self.llm | self.parser
 
-    def invoke(self, state: AgenticRAGState) -> dict:
+    def invoke(self, state: AegisRAGState) -> dict:
         """
         Critiques the draft answer against the retrieved documents.
         """

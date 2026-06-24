@@ -1,17 +1,17 @@
 from langgraph.graph import StateGraph, END
-from src.agents.state import AgenticRAGState
+from src.agents.state import AegisRAGState
 from src.agents.researcher import ResearcherAgent
 from src.agents.synthesizer import SynthesizerAgent
 from src.agents.critic import CriticAgent
 
-class AgenticRAGWorkflow:
+class AegisRAGWorkflow:
     def __init__(self, llm=None, use_hyde: bool = True, max_iterations: int = 3, vector_store=None):
         self.max_iterations = max_iterations
         self.researcher = ResearcherAgent(llm=llm, use_hyde=use_hyde, vector_store=vector_store)
         self.synthesizer = SynthesizerAgent(llm=llm)
         self.critic = CriticAgent(llm=llm)
         
-        self.workflow = StateGraph(AgenticRAGState)
+        self.workflow = StateGraph(AegisRAGState)
         self._build_graph()
 
     def _build_graph(self):
@@ -37,7 +37,7 @@ class AgenticRAGWorkflow:
         
         self.app = self.workflow.compile()
 
-    def _decide_next_step(self, state: AgenticRAGState):
+    def _decide_next_step(self, state: AegisRAGState):
         if state["is_hallucination"] and state.get("iterations", 0) < self.max_iterations:
             print("--- DECISION: Hallucination detected. Rewriting... ---")
             return "rewrite"
@@ -45,7 +45,7 @@ class AgenticRAGWorkflow:
         return "end"
         
     def run(self, question: str):
-        print(f"\n[Starting Agentic Workflow] Question: {question}")
+        print(f"\n[Starting AegisRAG Workflow] Question: {question}")
         initial_state = {
             "question": question,
             "documents": [],
@@ -60,7 +60,7 @@ class AgenticRAGWorkflow:
         return final_result.get("draft_answer", "No answer generated.")
 
     def stream(self, question: str):
-        print(f"\n[Starting Agentic Workflow Stream] Question: {question}")
+        print(f"\n[Starting AegisRAG Workflow Stream] Question: {question}")
         initial_state = {
             "question": question,
             "documents": [],

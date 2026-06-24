@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-06-24
 
 ### Added
+- **Multi-Model Support**: Added a UI dropdown to dynamically hot-swap between local `llama3` and cloud-hosted `claude-3-5-sonnet`.
 - **Supervisor Agent**: Implemented `SupervisorAgent` at the start of the workflow to route generic questions directly to answers without going through the heavy RAG pipelines.
 - **Web Search Fallback**: Added `DuckDuckGoSearchRun` to the `ResearcherAgent` to dynamically fetch answers from the internet if the local vector store yields no relevant context.
 - **Conversational Memory**: Updated `AegisRAGState`, `AegisRAGWorkflow`, `SynthesizerAgent`, and Streamlit UI to maintain and utilize multi-turn chat history.

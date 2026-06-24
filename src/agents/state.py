@@ -12,5 +12,6 @@ class AegisRAGState(TypedDict):
     draft_answer: str
     critique: str
     is_hallucination: bool
+    needs_rag: bool
     final_answer: dict # Structured output
     iterations: int

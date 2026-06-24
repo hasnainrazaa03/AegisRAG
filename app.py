@@ -152,7 +152,16 @@ if query:
             for s in workflow.stream(query, chat_history=st.session_state.chat_history[:-1]):
                 # 's' is a dictionary keyed by the node name
                 for node, state in s.items():
-                    if node == "research":
+                    if node == "supervisor":
+                        if not state.get("needs_rag", True):
+                            final_draft = state.get("draft_answer", "")
+                            with visualizer_container:
+                                components.html(get_agent_graph_html("complete"), height=420)
+                            st.toast("⚡ Supervisor bypassed RAG and provided a direct answer.")
+                        else:
+                            with visualizer_container:
+                                components.html(get_agent_graph_html("research"), height=420)
+                    elif node == "research":
                         # Transition to Synthesizer
                         with visualizer_container:
                             components.html(get_agent_graph_html("synthesize"), height=420)

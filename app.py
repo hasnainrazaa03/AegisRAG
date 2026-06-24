@@ -155,7 +155,84 @@ def render_knowledge_graph():
 if st.sidebar.button("🌌 Visualize Knowledge Graph", use_container_width=True):
     render_knowledge_graph()
 
+
+def render_live_connections_graph(query_text, retrieved_docs):
+    with st.spinner("Computing 2D AI Inference Connections..."):
+        try:
+            points, payloads = workflow.researcher.retriever.vector_store.get_all_vectors()
+            if not points:
+                return
+            
+            query_vector = workflow.researcher.retriever.vector_store.embeddings.embed_query(query_text)
+            
+            from sklearn.decomposition import PCA
+            import plotly.graph_objects as go
+            import pandas as pd
+            import numpy as np
+            
+            all_vectors = points + [query_vector]
+            pca = PCA(n_components=2)
+            components = pca.fit_transform(all_vectors)
+            
+            bg_components = components[:-1]
+            query_comp = components[-1]
+            
+            fig = go.Figure()
+            
+            # Background points
+            fig.add_trace(go.Scatter(
+                x=bg_components[:, 0],
+                y=bg_components[:, 1],
+                mode='markers',
+                marker=dict(size=6, color='lightgray', opacity=0.5),
+                name='Knowledge Base'
+            ))
+            
+            retrieved_contents = [d.page_content for d in retrieved_docs]
+            retrieved_indices = []
+            for i, p in enumerate(payloads):
+                if p.get('page_content') in retrieved_contents:
+                    retrieved_indices.append(i)
+                    
+            # Draw retrieved points and lines
+            if retrieved_indices:
+                ret_x = [bg_components[i, 0] for i in retrieved_indices]
+                ret_y = [bg_components[i, 1] for i in retrieved_indices]
+                
+                fig.add_trace(go.Scatter(
+                    x=ret_x,
+                    y=ret_y,
+                    mode='markers',
+                    marker=dict(size=10, color='blue', symbol='circle'),
+                    name='Retrieved Chunks'
+                ))
+                
+                for rx, ry in zip(ret_x, ret_y):
+                    fig.add_trace(go.Scatter(
+                        x=[query_comp[0], rx],
+                        y=[query_comp[1], ry],
+                        mode='lines',
+                        line=dict(color='red', width=2, dash='dash'),
+                        showlegend=False
+                    ))
+            
+            # Query point
+            fig.add_trace(go.Scatter(
+                x=[query_comp[0]],
+                y=[query_comp[1]],
+                mode='markers',
+                marker=dict(size=16, color='red', symbol='star'),
+                name='Your Query'
+            ))
+            
+            fig.update_layout(title="🧠 Live AI Inference Connections (2D PCA)", margin=dict(l=0, r=0, t=30, b=0))
+            st.plotly_chart(fig, use_container_width=True)
+            
+        except Exception as e:
+            st.error(f"Failed to generate connection graph: {e}")
+
 # ---- MAIN INTERFACE ----
+
 from langchain_core.messages import HumanMessage, AIMessage
 
 if "chat_history" not in st.session_state:
@@ -299,6 +376,10 @@ if query or st.session_state.resume_graph:
                     file_name="aegisrag_report.md",
                     mime="text/markdown"
                 )
+                
+                if final_docs:
+                    with st.expander("🧠 View Live AI Inference Connections", expanded=False):
+                        render_live_connections_graph(query_to_run, final_docs)
 
                 st.session_state.chat_history.append(AIMessage(content=display_draft))
             

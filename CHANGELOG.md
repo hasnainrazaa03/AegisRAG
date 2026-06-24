@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Active Document Grading (Self-RAG)**: `GraderAgent` evaluates relevance of retrieved context chunks and explicitly filters out bad documents to prevent hallucination context bloat.
 - **Export to Report**: Users can now download a clean Markdown `.md` report containing their question, the synthesized answer, and references directly from the chat UI.
 - **Human-in-the-Loop (HIL)**: Graph execution now natively pauses (`interrupt_before`) prior to the synthesis stage, allowing users to manually approve or reject the graded context via the UI.
+- **Vector DB Visualization**: Users can click the "Visualize Knowledge Graph" sidebar button to view a 3D PCA projection of all embedded document chunks.
+- **Live 2D AI Inference Connections**: The chat UI now automatically renders an inline 2D scatter plot after answering a query, visualizing the user's query and drawing connections to the retrieved context chunks.
 
 ## [1.0.0] - 2026-06-24
 

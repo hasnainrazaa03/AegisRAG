@@ -12,6 +12,9 @@ This document tracks upcoming features, structural architectural changes, and kn
 
 ## Completed Features
 - [x] **Multi-Model Router**: Add a dropdown in the UI to dynamically switch between local `llama3` and cloud-hosted `claude-3-5-sonnet`.
+- [x] **Visual Node Graph**: Add an animated graph (using HTML/CSS or Streamlit columns) that lights up the "Current Agent" (e.g. `[RESEARCHER] -> [SYNTHESIZER] -> [CRITIC]`) so the user can watch the multi-agent handoffs in real time.
+- [x] **Vector DB Visualization**: Render the 384-dimensional knowledge graph using PCA and an interactive 3D scatter plot.
+- [x] **Live 2D Knowledge Graph Connections**: Render a 2D scatter plot inline in the chat interface that draws connection lines between the embedded query and the retrieved documents in the knowledge space.
 - [x] **Conversational Memory**: Update the `AegisRAGState` to store full conversation history so agents can perform multi-turn context lookups.
 - [x] **Web Search Tool**: Give the `ResearcherAgent` a Tavily/DuckDuckGo tool to fetch real-time web results if the internal database yields empty context.
 - [x] **Supervisor Agent**: A master agent that decides *which* sub-agents need to run (e.g. bypassing the Synthesizer if a direct exact match was found).

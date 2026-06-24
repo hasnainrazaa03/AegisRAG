@@ -1,0 +1,16 @@
+# Structural Tolerance Limits for Primary Load-Bearing Beams
+
+## Overview
+This document outlines the standard structural tolerance limits for primary load-bearing beams used in Class A commercial aerospace engineering projects.
+
+## Material Specifications
+The primary beams are constructed from Aerospace-Grade Titanium Alloy Ti-6Al-4V.
+
+## Tolerance Limits
+- Maximum Tensile Strength: 950 MPa
+- Yield Strength Limit: 880 MPa
+- Maximum Load Capacity: 15,000 kg per beam
+- Deflection Limit: 1/360 of the span under maximum load
+
+## Safety Factors
+A safety factor of 1.5 must be applied to all calculations involving primary load-bearing beams. The structural tolerance limits must not be exceeded during peak operational stress testing.

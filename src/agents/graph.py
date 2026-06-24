@@ -81,7 +81,7 @@ class AegisRAGWorkflow:
         final_result = self.app.invoke(initial_state)
         return final_result.get("draft_answer", "No answer generated.")
 
-    def stream(self, question: str, chat_history: list = None):
+    def stream(self, question: str, chat_history: list = None, config: dict = None):
         if chat_history is None:
             chat_history = []
         print(f"\n[Starting AegisRAG Workflow Stream] Question: {question}")
@@ -96,4 +96,4 @@ class AegisRAGWorkflow:
             "iterations": 0,
             "final_answer": {}
         }
-        return self.app.stream(initial_state)
+        return self.app.stream(initial_state, config=config)

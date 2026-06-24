@@ -1,6 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableConfig
 from src.agents.state import AegisRAGState
 
 class SynthesizerAgent:
@@ -13,7 +14,7 @@ class SynthesizerAgent:
         ])
         self.chain = self.prompt | self.llm | StrOutputParser()
 
-    def invoke(self, state: AegisRAGState) -> dict:
+    def invoke(self, state: AegisRAGState, config: RunnableConfig = None) -> dict:
         """
         Synthesizes an answer based solely on the retrieved documents.
         """
@@ -23,10 +24,22 @@ class SynthesizerAgent:
             
         context_str = "\n\n".join([f"[Source {i+1}]\n{doc.page_content}" for i, doc in enumerate(state["documents"])])
         
-        draft = self.chain.invoke({
-            "chat_history": state.get("chat_history", []),
-            "context": context_str,
-            "question": state["question"]
-        })
+        container = config.get("configurable", {}).get("stream_container") if config else None
+        
+        draft = ""
+        if container:
+            for chunk in self.chain.stream({
+                "chat_history": state.get("chat_history", []),
+                "context": context_str,
+                "question": state["question"]
+            }):
+                draft += chunk
+                container.markdown(draft)
+        else:
+            draft = self.chain.invoke({
+                "chat_history": state.get("chat_history", []),
+                "context": context_str,
+                "question": state["question"]
+            })
         
         return {"draft_answer": draft}

@@ -142,6 +142,7 @@ if query:
     # Stream execution using the Custom HTML/SVG Visualizer
     with st.chat_message("assistant"):
         visualizer_container = st.empty()
+        answer_container = st.empty()
         
         try:
             # Initial render: Researcher active
@@ -150,7 +151,11 @@ if query:
             
             final_draft = ""
             final_docs = []
-            for s in workflow.stream(query, chat_history=st.session_state.chat_history[:-1]):
+            for s in workflow.stream(
+                query, 
+                chat_history=st.session_state.chat_history[:-1],
+                config={"configurable": {"stream_container": answer_container}}
+            ):
                 # 's' is a dictionary keyed by the node name
                 for node, state in s.items():
                     if "documents" in state:
@@ -186,6 +191,7 @@ if query:
                                 components.html(get_agent_graph_html("complete"), height=420)
                             st.toast("✅ Critic approved the response!")
             
+            answer_container.empty()
             display_draft = final_draft
             if final_docs:
                 references_md = "\n\n**References & Sources:**\n"

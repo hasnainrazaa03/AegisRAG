@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Inline Source Citations & References**: `SynthesizerAgent` now properly injects references into its answers (`[1]`, `[2]`), and `app.py` renders an expandable 'References & Sources' list at the bottom of the message.
 - **Query Contextualization**: `ResearcherAgent` reformulates queries referencing chat history to stand-alone queries prior to searching vector store or web.
 - **Multi-Model Support**: Dropdown added in sidebar to hot-swap between `llama3` and `claude-3-5-sonnet`.
+- **Streaming Answers**: `SynthesizerAgent` now streams output token-by-token to the Streamlit UI.
 
 ## [1.0.0] - 2026-06-24
 

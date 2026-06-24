@@ -55,3 +55,30 @@ class VectorStore:
             embedding=self.embeddings,
         )
         return qdrant.as_retriever(search_kwargs=search_kwargs)
+
+    def get_all_vectors(self):
+        """
+        Fetches all vectors and their associated payload from the Qdrant collection.
+        Returns a tuple of (points, payloads).
+        """
+        points = []
+        payloads = []
+        offset = None
+        
+        while True:
+            records, next_offset = self.client.scroll(
+                collection_name=self.collection_name,
+                limit=1000,
+                with_payload=True,
+                with_vectors=True,
+                offset=offset
+            )
+            for record in records:
+                points.append(record.vector)
+                payloads.append(record.payload)
+                
+            if next_offset is None:
+                break
+            offset = next_offset
+            
+        return points, payloads

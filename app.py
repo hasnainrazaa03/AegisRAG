@@ -115,6 +115,46 @@ st.sidebar.write(f"**Data Directory:** `{config.DATA_DIR}`")
 st.sidebar.write("**Vector Store:** `Qdrant (Local)`")
 st.sidebar.write("**Re-ranker:** `FlashRank (TinyBERT)`")
 
+st.sidebar.divider()
+
+@st.dialog("Knowledge Graph Visualization", width="large")
+def render_knowledge_graph():
+    with st.spinner("Fetching vectors and computing 3D projection (PCA)..."):
+        try:
+            points, payloads = workflow.researcher.retriever.vector_store.get_all_vectors()
+            if not points:
+                st.warning("No documents ingested yet. Please upload a document first.")
+                return
+                
+            st.write(f"Visualizing **{len(points)}** knowledge chunks.")
+            
+            from sklearn.decomposition import PCA
+            import plotly.express as px
+            import pandas as pd
+            
+            pca = PCA(n_components=3)
+            components = pca.fit_transform(points)
+            
+            df = pd.DataFrame(components, columns=['x', 'y', 'z'])
+            df['source'] = [p.get('metadata', {}).get('source', 'Unknown') for p in payloads]
+            df['content'] = [p.get('page_content', '')[:150] + '...' for p in payloads]
+            
+            fig = px.scatter_3d(
+                df, x='x', y='y', z='z',
+                color='source',
+                hover_data=['content'],
+                title="3D PCA of Knowledge Graph Vectors"
+            )
+            fig.update_traces(marker=dict(size=5, opacity=0.8))
+            fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
+            
+            st.plotly_chart(fig, use_container_width=True)
+        except Exception as e:
+            st.error(f"Failed to render graph: {e}")
+
+if st.sidebar.button("🌌 Visualize Knowledge Graph", use_container_width=True):
+    render_knowledge_graph()
+
 # ---- MAIN INTERFACE ----
 from langchain_core.messages import HumanMessage, AIMessage
 

@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Comprehensive Unit Testing**: A robust `pytest` suite simulating edge cases, LLM failures, and mocking the database.
 - **GitHub Actions Pipeline**: `.github/workflows/test.yml` running Pytest and Codecov on every commit.
 
+### Changed
+- **Visualizer Redesign**: Completely overhauled the Streamlit SVG visualizer to use a 3-node connected layout with MagicUI-style animated circular progress rings, dynamic numerical progress counters, and modernized typography.
+
 ### Fixed
 - Re-architected Qdrant local VectorStore instantiation as a Streamlit singleton (`@st.cache_resource`) to prevent process locking crashes (`Errno 35 Resource temporarily unavailable`).
 - `CriticAgent` now gracefully catches malformed JSON output from LLMs and correctly routes to "rewrite".

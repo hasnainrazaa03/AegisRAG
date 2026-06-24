@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import os
 import sys
 import tempfile
@@ -133,7 +134,8 @@ if query:
         
         try:
             # Initial render: Researcher active
-            visualizer_container.markdown(get_agent_graph_html("research"), unsafe_allow_html=True)
+            with visualizer_container:
+                components.html(get_agent_graph_html("research"), height=420)
             
             final_draft = ""
             for s in workflow.stream(query):
@@ -141,20 +143,24 @@ if query:
                 for node, state in s.items():
                     if node == "research":
                         # Transition to Synthesizer
-                        visualizer_container.markdown(get_agent_graph_html("synthesize"), unsafe_allow_html=True)
+                        with visualizer_container:
+                            components.html(get_agent_graph_html("synthesize"), height=420)
                     elif node == "synthesize":
                         # Transition to Critic
-                        visualizer_container.markdown(get_agent_graph_html("critique"), unsafe_allow_html=True)
+                        with visualizer_container:
+                            components.html(get_agent_graph_html("critique"), height=420)
                         final_draft = state.get("draft_answer", "")
                     elif node == "critique":
                         is_hal = state.get('is_hallucination', False)
                         if is_hal:
                             # Handoff back to Synthesize (rewrite)
-                            visualizer_container.markdown(get_agent_graph_html("rewrite"), unsafe_allow_html=True)
+                            with visualizer_container:
+                                components.html(get_agent_graph_html("rewrite"), height=420)
                             st.toast(f"⚠️ Critic detected hallucination: {state.get('critique', '')}. Rewriting...")
                         else:
                             # Proceeding to End!
-                            visualizer_container.markdown(get_agent_graph_html("complete"), unsafe_allow_html=True)
+                            with visualizer_container:
+                                components.html(get_agent_graph_html("complete"), height=420)
                             st.toast("✅ Critic approved the response!")
             
             st.subheader("Final Synthesized Answer:")

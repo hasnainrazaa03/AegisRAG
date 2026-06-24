@@ -178,6 +178,18 @@ def render_live_connections_graph(query_text, retrieved_docs, container=st):
     with st.spinner("Computing 2D AI Inference Connections..."):
         try:
             points, payloads = workflow.researcher.retriever.vector_store.get_all_vectors()
+            
+            # Enforce strict homogeneity to prevent numpy inhomogeneous shape errors
+            valid_points = []
+            valid_payloads = []
+            for p, pay in zip(points, payloads):
+                if hasattr(p, '__len__') and len(p) == 384:
+                    valid_points.append(p)
+                    valid_payloads.append(pay)
+            
+            points = valid_points
+            payloads = valid_payloads
+            
             if not points:
                 return
             
@@ -348,7 +360,13 @@ if query or st.session_state.resume_graph:
                     elif node == "research":
                         with visualizer_container:
                             components.html(get_agent_graph_html("grade"), height=420)
-                        render_live_connections_graph(query_to_run, state.get("documents", []), container=graph_container)
+                            
+                        # Animate the connections being found one-by-one!
+                        import time
+                        docs = state.get("documents", [])
+                        for i in range(1, len(docs) + 1):
+                            render_live_connections_graph(query_to_run, docs[:i], container=graph_container)
+                            time.sleep(0.6) # Short pause to see the connection drawn
                     elif node == "grade":
                         with visualizer_container:
                             components.html(get_agent_graph_html("synthesize"), height=420)

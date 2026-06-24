@@ -6,7 +6,7 @@ This document tracks upcoming features, structural architectural changes, and kn
 
 - [ ] **Multi-Model Router**: Add a dropdown in the UI to dynamically switch between local `llama3` and cloud-hosted `claude-3-5-sonnet`.
 - [x] **Conversational Memory**: Update the `AegisRAGState` to store full conversation history so agents can perform multi-turn context lookups.
-- [ ] **Web Search Tool**: Give the `ResearcherAgent` a Tavily/DuckDuckGo tool to fetch real-time web results if the internal database yields empty context.
+- [x] **Web Search Tool**: Give the `ResearcherAgent` a Tavily/DuckDuckGo tool to fetch real-time web results if the internal database yields empty context.
 - [ ] **Supervisor Agent**: A master agent that decides *which* sub-agents need to run (e.g. bypassing the Synthesizer if a direct exact match was found).
 
 ## Known Issues

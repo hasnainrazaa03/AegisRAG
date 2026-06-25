@@ -50,6 +50,16 @@ class ResearcherAgent:
                 print(f"Web search failed: {e}")
                 docs = []
         else:
-            docs = [{"page_content": d.page_content, "metadata": d.metadata} for d in docs]
+            # Sanitize metadata to ensure msgpack compatibility (e.g. numpy.float32 from Flashrank)
+            clean_docs = []
+            for d in docs:
+                clean_meta = {}
+                for k, v in d.metadata.items():
+                    if hasattr(v, "item"): # Check if it's a numpy scalar
+                        clean_meta[k] = v.item()
+                    else:
+                        clean_meta[k] = v
+                clean_docs.append({"page_content": d.page_content, "metadata": clean_meta})
+            docs = clean_docs
         
         return {"documents": docs}

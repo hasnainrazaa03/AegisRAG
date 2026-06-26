@@ -45,10 +45,16 @@ def get_llm():
             return None
         return ChatAnthropic(model_name="claude-3-5-sonnet-20240620", anthropic_api_key=config.ANTHROPIC_API_KEY)
     elif model_choice == "Cloud (Gemini 2.5 Flash)":
-        if not config.GOOGLE_API_KEY:
+        if config.GOOGLE_API_KEY:
+            from langchain_google_genai import ChatGoogleGenerativeAI
+            from langchain_ollama import ChatOllama
+            # Fallback gracefully to local Ollama if Gemini gets rate-limited (429)
+            primary = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=config.GOOGLE_API_KEY)
+            fallback = ChatOllama(model="llama3", temperature=0)
+            return primary.with_fallbacks([fallback])
+        else:
             st.sidebar.error("⚠️ GOOGLE_API_KEY not found in .env")
             return None
-        return ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=config.GOOGLE_API_KEY)
     else:
         return ChatOllama(model="llama3")
 

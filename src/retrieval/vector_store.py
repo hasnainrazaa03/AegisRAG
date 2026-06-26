@@ -8,19 +8,22 @@ from src.config import config
 class VectorStore:
     def __init__(self):
         # Using FastEmbed for local, fast embeddings without needing an API key
-        self.embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5")
         self.url = config.QDRANT_URL
         self.path = config.QDRANT_PATH
         self.collection_name = config.COLLECTION_NAME
         
-        if self.url == ":memory:":
-            self.client = QdrantClient(location=":memory:")
-        elif self.url:
+        print("Initializing FastEmbedEmbeddings for vector store...")
+        self.embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5")
+        
+        # Connect to Qdrant (Server preferred, fallback to Local)
+        if self.url:
+            print(f"Connecting to Qdrant Server at {self.url}")
             self.client = QdrantClient(url=self.url)
         else:
             # Local persistent storage via path
+            print(f"Connecting to Qdrant Local at {self.path}")
             self.client = QdrantClient(path=self.path)
-
+            
         # Ensure collection exists so Langchain doesn't throw a ValueError
         if not self.client.collection_exists(self.collection_name):
             from qdrant_client.models import VectorParams, Distance
